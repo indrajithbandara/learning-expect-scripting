@@ -1,0 +1,50 @@
+#!/usr/bin/expect -f
+set timeout 3
+set USER "user1"
+set PASS "1234567890Rr"
+while 1 {
+foreach HOST {localhost} {
+spawn sftp $USER@$HOST
+  expect {
+  "(yes/no)?*" {
+  send "yes\r"
+ }
+  }
+expect "word:"
+send "$PASS\r"
+  expect "*sftp*"
+  send "put adv_ls.bash\r"
+  send "exit\r"
+  expect eof
+ }
+spawn ssh $USER@$HOST
+  expect {
+  "(yes/no)?*" {
+  send "yes\r"
+ }
+  }
+expect "word:"
+send "$PASS\r"
+  expect "*host*"
+  send "./adv_ls.bash\r"
+  send "rm -f ./adv_ls.bash\r"
+  send "exit\r"
+  expect eof
+  spawn sftp $USER@$HOST
+    expect {
+    "(yes/no)?*" {
+    send "yes\r"
+   }
+    }
+  expect "word:"
+  send "$PASS\r"
+    expect "*sftp*"
+    send "get *.log\r"
+    expect "*sftp*"
+    send "rm *.log\r"
+    send "exit\r"
+    expect eof
+    exit 0;
+   }
+ }
+}
